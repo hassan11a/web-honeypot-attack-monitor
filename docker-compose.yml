@@ -1,0 +1,125 @@
+name: web-honeypot
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: hp-nginx
+    depends_on:
+      - honeypot
+      - dashboard
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - hp_edge
+      - hp_internal
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 128M
+
+  honeypot:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.honeypot
+    container_name: hp-honeypot
+    environment:
+      HONEYPOT_PORT: "8080"
+      DB_CLIENT: sqlite
+      SQLITE_FILE: /data/honeypot.db
+      TRUST_PROXY: "1"
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-120}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - hp_data:/data
+    networks:
+      - hp_internal
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dashboard
+    container_name: hp-dashboard
+    environment:
+      NODE_ENV: production
+      DB_CLIENT: sqlite
+      SQLITE_FILE: /data/honeypot.db
+      NEXT_PUBLIC_BASE_PATH: /soc
+      DASHBOARD_USER: ${DASHBOARD_USER:-admin}
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:?Set DASHBOARD_PASSWORD in .env}
+      SECURE_COOKIES: "0"
+      TRUST_PROXY: "1"
+      SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-12}
+    volumes:
+      - hp_data:/data
+    networks:
+      - hp_internal
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+
+  # Optional PostgreSQL (profiles: postgres). Switch DB_CLIENT=postgres and DATABASE_URL.
+  postgres:
+    image: postgres:16-alpine
+    container_name: hp-postgres
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: honeypot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-honeypot}
+      POSTGRES_DB: honeypot
+    volumes:
+      - hp_pgdata:/var/lib/postgresql/data
+    networks:
+      - hp_internal
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+
+networks:
+  hp_edge:
+    driver: bridge
+  hp_internal:
+    driver: bridge
+    internal: true
+
+volumes:
+  hp_data:
+  hp_pgdata:
