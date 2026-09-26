@@ -1,822 +1,301 @@
-<div align="center">
+Sentinel
+Web Honeypot & Security Operations Dashboard
 
-🛡️ Sentinel
+A defensive security monitoring platform that combines a deliberately fake web application with an authenticated SOC dashboard for controlled security research, detection testing, and incident visibility.
 
-Web Honeypot & Security Operations Monitoring Platform
 
-<p align="center">
-  <strong>Observe suspicious HTTP activity · Detect attack indicators · Analyze events · Practice defensive security</strong>
-</p>
 
-<p align="center">
-  <a href="#-overview">Overview</a> •
-  <a href="#-architecture">Architecture</a> •
-  <a href="#-features">Features</a> •
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-security-model">Security</a> •
-  <a href="#-api-reference">API</a>
-</p>
 
-<br>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Node.js-20%2B-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 20+"/>
-  <img src="https://img.shields.io/badge/TypeScript-5%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
-  <img src="https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js"/>
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React"/>
-  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
-</p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Security-Defensive%20Only-00C853?style=for-the-badge&logo=shield&logoColor=white" alt="Defensive Security"/>
-  <img src="https://img.shields.io/badge/Database-SQLite%20%7C%20PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="Database"/>
-  <img src="https://img.shields.io/badge/Live%20Monitoring-SSE-8A2BE2?style=for-the-badge" alt="SSE"/>
-</p>
 
-</div>
 
-🎯 Overview
 
-Sentinel is a deliberately fake e-commerce application designed as a defensive web honeypot and security monitoring platform.
 
-Instead of protecting a real production application, Sentinel provides a controlled environment where suspicious HTTP activity can be:
+Overview
 
-🔎 Captured
+Sentinel is a controlled web honeypot and security operations dashboard designed to observe suspicious HTTP activity and turn it into structured security events.
 
-🧠 Classified
+The system contains two primary components:
 
-📊 Visualized
+Component	Purpose
+Web Honeypot	Deliberately fake application that receives and records suspicious requests
+SOC Dashboard	Authenticated interface for investigating events, IP activity, alerts, detections and reports
 
-🚨 Alerted
+Sentinel is designed for authorized security testing and isolated laboratory environments.
 
-📝 Reported
+It does not execute attacker-controlled payloads and does not interact with external systems on behalf of an attacker.
 
-🧪 Studied
+Key Features
+Web Honeypot
+Fake e-commerce-style application
+Suspicious request monitoring
+Request metadata collection
+Sensitive-path detection
+Authentication monitoring
+Scanner detection
+Injection-pattern detection
+Traversal detection
+Unexpected HTTP method detection
+Query inspection
+Rate limiting
+Safe payload handling
+Security Detection Engine
 
-The platform combines a fake storefront with an authenticated SOC-style security dashboard, allowing security learners and defenders to observe suspicious traffic in a controlled environment.
+Sentinel currently includes 10 detection categories:
 
-Sentinel is designed for cybersecurity education, defensive monitoring, SOC practice, authorized research, and isolated laboratory environments.
+Detector	Purpose
+Admin Path	Detects access attempts against administrative paths
+Authentication Probe	Detects suspicious authentication activity
+Backup File	Detects requests for backup or sensitive files
+Frequency	Detects unusual request frequency
+Injection	Detects suspicious injection patterns
+Recon Path	Detects reconnaissance-oriented paths
+Scanner User-Agent	Detects known scanner-style user agents
+Suspicious Query	Detects suspicious query parameters
+Traversal	Detects path traversal patterns
+Unexpected Method	Detects unexpected HTTP methods
 
-⚠️ Safety First
+Each detector produces a structured result containing:
 
-Sentinel is intentionally designed as a defensive-only honeypot.
+Category
+Severity
+Detection status
+Reason
+Confidence
+Detection Severity
 
-It does not:
+Sentinel supports five severity levels:
 
-❌ Execute attacker-controlled payloads
+Severity	Meaning
+Info	Informational activity
+Low	Low-risk suspicious activity
+Medium	Moderate suspicious activity
+High	High-risk activity
+Critical	Critical detection
 
-❌ Exploit vulnerable systems
+When multiple detectors match the same request, Sentinel evaluates the results and records the highest applicable severity.
 
-❌ Collect real credentials
+Security Operations Dashboard
 
-❌ Store plaintext passwords
+The dashboard provides a centralized interface for investigating monitored activity.
 
-❌ Scan third-party infrastructure
+Dashboard Pages
+Page	Purpose
+/login	Dashboard authentication
+/setup	Initial configuration
+/dashboard	Security overview
+/events	Security event investigation
+/ips	IP activity overview
+/ips/[ip]	Individual IP investigation
+/authentication	Authentication activity
+/rules	Detection rules
+/reports	Security reports
+/settings	System configuration
+Live Monitoring
 
-❌ Perform credential stuffing
+Sentinel supports a live event stream using Server-Sent Events (SSE).
 
-❌ Launch attacks against external systems
+The dashboard can receive new security events without repeatedly refreshing the page.
 
-❌ Retaliate against suspicious sources
+Incoming Request
+       ↓
+Request Analysis
+       ↓
+Detection Engine
+       ↓
+Security Event
+       ↓
+Alert Evaluation
+       ↓
+Database
+       ↓
+SSE Live Stream
+       ↓
+SOC Dashboard
+Request Monitoring
 
-❌ Provide access to real administrative functionality
+For each monitored request, Sentinel can record structured metadata such as:
 
-All attacker-controlled input is treated as inert text.
+Data	Description
+Timestamp	Request time
+Method	HTTP method
+Path	Requested route
+Query	Query parameters
+IP	Source IP
+User-Agent	Client identification
+Referer	Request origin
+Status	HTTP response status
+Response Size	Response size
+Response Time	Processing duration
+Headers	Sanitized request headers
+Body Summary	Safe request-body summary
+Detections	Detection results
 
-For fake login traps, Sentinel stores indicators such as:
-
-username
-authentication result
-password_submitted
-password length bucket
-
-It does not store the submitted password itself.
-
-🧩 Core Architecture
-
-Sentinel consists of two primary services sharing a common database.
-
-Service
-
-Purpose
-
-Technology
-
-🛒 Web Honeypot
-
-Fake e-commerce application exposed to test traffic
-
-Express + TypeScript
-
-🖥️ SOC Dashboard
-
-Authenticated security monitoring console
-
-Next.js + React + Tailwind
-
-The platform additionally provides:
-
-Detection engine
-
-Event database
+Sensitive information is handled with sanitization and redaction mechanisms.
 
 Alerting
 
-Rate limiting
-
-Authentication
-
-SSE live monitoring
-
-Reports
-
-Docker isolation
-
-🏗️ Architecture
-
-                         Internet / Test Network
-                                  │
-                                  ▼
-                    ┌──────────────────────────┐
-                    │       Reverse Proxy      │
-                    │          nginx           │
-                    └────────────┬─────────────┘
-                                 │
-                 ┌───────────────┴────────────────┐
-                 │                                │
-                 ▼                                ▼
-       ┌──────────────────┐             ┌──────────────────┐
-       │   Web Honeypot   │             │  SOC Dashboard   │
-       │                  │             │                  │
-       │ Express + TS     │             │ Next.js + React  │
-       │ Fake Store       │             │ Tailwind CSS     │
-       └────────┬─────────┘             └────────┬─────────┘
-                │                                │
-                ▼                                │
-       ┌──────────────────┐                      │
-       │ Detection Engine │                      │
-       │                  │                      │
-       │ 10 Detectors     │                      │
-       │ Rate Limiting    │                      │
-       │ Redaction        │                      │
-       └────────┬─────────┘                      │
-                │                                │
-                └──────────────┬─────────────────┘
-                               ▼
-                    ┌─────────────────────┐
-                    │    Event Database   │
-                    │                     │
-                    │ SQLite / PostgreSQL │
-                    └─────────────────────┘
-
-✨ Features
-
-🕸️ Web Honeypot
-
-A complete fake e-commerce storefront designed to generate realistic application traffic.
-
-Includes:
-
-Announcement bar
-
-Sticky navigation
-
-Search
-
-Hero section
-
-Categories
-
-Product grid
-
-Reviews
-
-Newsletter
-
-Footer
-
-Fake authentication
-
-Fake administration routes
-
-Fake dashboard
-
-Branded 404 page
-
-Trap Routes
-
-/login
-/admin
-/admin/login
-/dashboard
-/api
-/products
-/search
-/contact
-
-These routes provide controlled surfaces for observing suspicious requests.
-
-🔍 Request Monitoring
-
-Sentinel records security-relevant request metadata including:
-
-Timestamp
-HTTP method
-Request path
-Query parameters
-IP address
-User agent
-Referer
-HTTP status
-Response size
-Response time
-Sanitized headers
-Body summary
-Detection results
-
-Sensitive information is redacted before storage where applicable.
-
-🧠 Detection Engine
-
-Sentinel uses 10 independent detectors.
-
-Each detector can be enabled or disabled at runtime from the SOC dashboard.
-
-Detection Pipeline
-
-Incoming Request
-       │
-       ▼
-Rate Limiter
-       │
-       ▼
-Request Capture
-       │
-       ▼
-Redaction
-       │
-       ▼
-Detection Engine
-       │
-       ├── Admin Path
-       ├── Authentication Probe
-       ├── Backup File
-       ├── Frequency
-       ├── Injection
-       ├── Recon Path
-       ├── Scanner User-Agent
-       ├── Suspicious Query
-       ├── Traversal
-       └── Unexpected Method
-       │
-       ▼
-Classification
-       │
-       ▼
-Database
-       │
-       ├── Alert
-       └── Dashboard
-
-🧪 Detection Categories
-
-Detector
-
-Detects
-
-admin-path.ts
-
-Common administrative paths
-
-backup-file.ts
-
-.env, .git, backup/config paths
-
-traversal.ts
-
-Path traversal indicators
-
-injection.ts
-
-SQL/XSS/command/JNDI-style patterns
-
-scanner-user-agent.ts
-
-Known scanner-style user agents
-
-unexpected-method.ts
-
-Unexpected HTTP methods
-
-auth-probe.ts
-
-Repeated or unusual login activity
-
-frequency.ts
-
-High request volume
-
-recon-path.ts
-
-Reconnaissance-oriented paths
-
-suspicious-query.ts
-
-Suspicious query parameters
-
-Detection results are deliberately cautious. Sentinel reports possible or suspicious indicators rather than claiming an attack succeeded merely because a pattern matched.
-
-🚨 Alerting
-
-Sentinel can generate alerts for:
+Sentinel can generate alerts for events such as:
 
 Authentication bursts
-
 Scanner activity
-
 Request-volume spikes
-
 High-risk detection patterns
 
-Sensitive-path activity
-
-Alerts use a 15-minute deduplication window.
-
-📊 SOC Dashboard
-
-The authenticated security dashboard provides a central place to monitor the honeypot.
-
-Dashboard Areas
-
-┌────────────────────────────────────────────────────────┐
-│                    SENTINEL SOC                        │
-├─────────────┬──────────────────────────────────────────┤
-│ Overview    │ KPIs · Charts · Recent Alerts            │
-│ Events      │ Filterable Security Events               │
-│ IP Activity │ IP statistics + activity labels          │
-│ Auth        │ Fake authentication attempts             │
-│ Rules       │ Detection rule controls                  │
-│ Reports     │ JSON · CSV · HTML exports                │
-│ Settings    │ Runtime thresholds                       │
-└─────────────┴──────────────────────────────────────────┘
-
-Dashboard Pages
-
-Route
-
-Purpose
-
-/login
-
-Console authentication
-
-/setup
-
-First-run setup
-
-/dashboard
-
-KPIs, charts and alerts
-
-/events
-
-Event monitoring
-
-/ips
-
-IP activity
-
-/ips/[ip]
-
-Individual IP investigation
-
-/authentication
-
-Authentication attempts
-
-/rules
-
-Detection controls
-
-/reports
-
-Report generation
-
-/settings
-
-Runtime configuration
-
-⚡ Live Event Monitoring
-
-Sentinel uses Server-Sent Events (SSE) for live event updates.
-
-Honeypot
-   │
-   │ New Event
-   ▼
-Database
-   │
-   ▼
-SSE Stream
-   │
-   ▼
-SOC Dashboard
-   │
-   ▼
-Live Event Feed
-
-This allows security events to appear in the dashboard without requiring a full page refresh.
-
-🗄️ Database
-
-Sentinel supports two database backends.
-
-SQLite
-
-Default configuration:
-
-./data/honeypot.db
-
-PostgreSQL
-
-Optional PostgreSQL support is available through the pg driver.
-
-Data Model
-
-Table
-
-Purpose
-
-security_events
-
-Captured request metadata and detections
-
-login_events
-
-Fake authentication attempts
-
-scan_sessions
-
-Per-IP activity windows
-
-ip_activity
-
-IP activity aggregates
-
-alerts
-
-Generated security alerts
-
-settings
-
-Runtime configuration
-
-detector_state
-
-Detector enable/disable state
-
-dashboard_users
-
-Console users
-
-dashboard_sessions
-
-Session token hashes
-
-Credential Safety
-
-Dashboard passwords use:
-
-scrypt hashing
-
-Session identifiers are stored as hashes, and session cookies use:
-
-HttpOnly
-
-🧰 Tech Stack
-
-Backend
-
-<p>
-<img src="https://skillicons.dev/icons?i=nodejs,express,typescript" alt="Backend technologies"/>
-</p>
-
-Node.js 20+
-
-Express 5
-
-TypeScript
-
-tsx
-
-Frontend
-
-<p>
-<img src="https://skillicons.dev/icons?i=nextjs,react,tailwind" alt="Frontend technologies"/>
-</p>
-
-Next.js 16
-
-React 19
-
-TypeScript
-
-Tailwind CSS v4
-
-Recharts
+Alerts use a 15-minute deduplication window to reduce repeated notifications for the same activity pattern.
 
 Database
 
-<p>
-<img src="https://skillicons.dev/icons?i=sqlite,postgres" alt="Database technologies"/>
-</p>
+Sentinel supports SQLite and PostgreSQL.
 
-SQLite
+Core Tables
+Table	Purpose
+security_events	Recorded security events
+login_events	Authentication activity
+scan_sessions	Scanner/reconnaissance sessions
+ip_activity	IP-based activity tracking
+alerts	Generated security alerts
+settings	Application configuration
+detector_state	Detector state
+dashboard_users	Dashboard users
+dashboard_sessions	Authenticated sessions
+Credential & Session Security
 
-PostgreSQL
+Sentinel uses several defensive mechanisms:
 
-better-sqlite3
+Password hashing with scrypt
+Session identifiers stored as hashes
+HttpOnly session cookies
+Configurable session expiration
+Optional secure cookies
+Sanitized security-event logging
+Redaction of sensitive information
 
-pg
+Plaintext dashboard passwords should never be stored in the database.
 
-Infrastructure
+Technology Stack
+Layer	Technology
+Runtime	Node.js 20+
+Backend	Express 5
+Language	TypeScript
+Frontend	Next.js 16
+UI	React 19
+Styling	Tailwind CSS v4
+Charts	Recharts
+Database	SQLite / PostgreSQL
+SQLite Driver	better-sqlite3
+PostgreSQL Driver	pg
+Containers	Docker
+Orchestration	Docker Compose
+Reverse Proxy	nginx
+Testing	Vitest + Supertest
+Linting	ESLint 9
+Project Structure
 
-<p>
-<img src="https://skillicons.dev/icons?i=docker,nginx" alt="Infrastructure technologies"/>
-</p>
+The project is organized into clear application layers.
 
-Docker
-
-Docker Compose
-
-nginx
-
-Testing & Quality
-
-Vitest
-
-Supertest
-
-ESLint 9
-
-TypeScript compiler
-
-📁 Project Structure
-
-web-honeypot/
-│
-├── app/
-│   ├── layout.tsx
-│   ├── page.tsx
-│   ├── globals.css
-│   ├── login/
-│   ├── setup/
-│   ├── (soc)/
-│   │   ├── layout.tsx
-│   │   ├── dashboard/
-│   │   ├── events/
-│   │   ├── ips/
-│   │   ├── authentication/
-│   │   ├── rules/
-│   │   ├── reports/
-│   │   └── settings/
-│   │
-│   └── api/
-│       ├── auth/
-│       ├── stats/
-│       ├── events/
-│       ├── ips/
-│       ├── logins/
-│       ├── alerts/
-│       ├── rules/
-│       ├── settings/
-│       ├── reports/
-│       └── setup/
-│
-├── components/
-│   ├── Sidebar.tsx
-│   ├── TopBar.tsx
-│   ├── LiveFeed.tsx
-│   ├── EventDetail.tsx
-│   ├── charts.tsx
-│   └── ui.tsx
-│
-├── honeypot/
-│   ├── server.ts
-│   ├── handlers/
-│   │   ├── app.ts
-│   │   ├── pages.ts
-│   │   └── pipeline.ts
-│   │
-│   ├── detection/
-│   │   ├── engine.ts
-│   │   ├── index.ts
-│   │   ├── types.ts
-│   │   └── detectors/
-│   │       ├── admin-path.ts
-│   │       ├── auth-probe.ts
-│   │       ├── backup-file.ts
-│   │       ├── frequency.ts
-│   │       ├── injection.ts
-│   │       ├── recon-path.ts
-│   │       ├── scanner-user-agent.ts
-│   │       ├── suspicious-query.ts
-│   │       ├── traversal.ts
-│   │       └── unexpected-method.ts
-│   │
-│   ├── rate-limit/
-│   ├── request-monitor/
-│   └── alerts/
-│
-├── database/
-│   ├── index.ts
-│   ├── client.ts
-│   ├── sqlite.ts
-│   ├── postgres.ts
-│   ├── schema.ts
-│   └── repositories.ts
-│
-├── lib/
-│   ├── config.ts
-│   ├── auth.ts
-│   ├── api-auth.ts
-│   ├── password.ts
-│   ├── redact.ts
-│   ├── settings.ts
-│   ├── logger.ts
-│   └── ip.ts
-│
-├── reports/
-│   └── build.ts
-│
-├── scripts/
-│   └── generate-test-data.ts
-│
-├── tests/
-│   ├── auth.test.ts
-│   ├── database.test.ts
-│   ├── detection.test.ts
-│   ├── honeypot.test.ts
-│   ├── rate-limit.test.ts
-│   └── validation.test.ts
-│
-├── docker/
-│   ├── Dockerfile.honeypot
-│   ├── Dockerfile.dashboard
-│   └── nginx.conf
-│
-├── data/
-├── public/
-├── types/
-│   └── index.ts
-│
-├── proxy.ts
-├── .env.example
-├── package.json
-├── tsconfig.json
-├── vitest.config.ts
-├── postcss.config.mjs
-├── AGENTS.md
-└── README.md
-
-⚡ Quick Start
-
+Directory / File	Responsibility
+app/	Next.js application
+components/	Reusable UI components
+honeypot/	Honeypot server and request handling
+database/	Database layer
+lib/	Shared application logic
+reports/	Report generation
+scripts/	Development and utility scripts
+tests/	Automated tests
+docker/	Docker-related configuration
+data/	Local database/runtime data
+public/	Public static assets
+types/	TypeScript types
+proxy.ts	Proxy-related application logic
+.env.example	Environment configuration template
+package.json	Dependencies and scripts
+tsconfig.json	TypeScript configuration
+vitest.config.ts	Test configuration
+Installation
 Requirements
 
-Requirement
+Before running Sentinel locally, install:
 
-Version
-
-Node.js
-
-20+
-
+Node.js 20+
 npm
-
-10+
-
 Git
 
-Recent version
+For containerized deployment:
 
 Docker
+Docker Compose
+Quick Start
 
-Optional
+Clone the repository:
 
-PostgreSQL
+git clone <your-repository-url>
+cd sentinel
 
-16+ optional
+Create the environment file:
 
-1️⃣ Clone the Project
-
-git clone <your-repo-url>.git
-cd web-honeypot
-
-2️⃣ Create Environment File
-
+Linux / macOS
 cp .env.example .env
-
 Windows PowerShell
-
 Copy-Item .env.example .env
 
-Set a strong dashboard password in .env:
+Set a dashboard password inside .env:
 
-DASHBOARD_PASSWORD=your-long-random-password
+DASHBOARD_PASSWORD=your-secure-password
 
-3️⃣ Install Dependencies
+Install dependencies:
 
 npm install
 
-4️⃣ Start Sentinel
+Start development mode:
 
 npm run dev
+Local URLs
 
-This starts both services.
+When running the development environment:
 
-Service
+Service	URL
+Honeypot	http://localhost:8080
+SOC Dashboard	http://localhost:3000
+Testing the Honeypot
 
-Address
-
-🛒 Honeypot
-
-http://localhost:8080
-
-🖥️ SOC Dashboard
-
-http://localhost:3000
-
-🧪 Generate Test Events
-
-Once Sentinel is running, you can generate controlled test traffic.
+The following requests can be used inside an authorized local laboratory environment to generate test events.
 
 Sensitive Path
-
 curl http://localhost:8080/.env
-
-XSS-Looking Query
-
-curl "http://localhost:8080/search?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E"
-
+Suspicious Search Query
+curl "http://localhost:8080/search?q=<test-payload>"
 Scanner User-Agent
-
 curl -A "sqlmap/1.7.2" http://localhost:8080/admin/login
-
 Unexpected HTTP Method
-
 curl -X TRACE http://localhost:8080/
-
-Fake Login Trap
-
+Fake Login Event
 curl -X POST http://localhost:8080/login \
-  -d "username=admin&password=Secret123!" \
-  -H "Content-Type: application/x-www-form-urlencoded"
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","password":"test"}'
 
-The submitted password is not stored in plaintext.
+These examples are intended for the local Sentinel environment only.
 
-Open the dashboard and navigate to:
+Development Test Data
 
-Live Events
-
-to observe the resulting events.
-
-🧪 Development Test Data
-
-For development/demo environments:
+Sentinel provides a development-only test-data command:
 
 npm run testdata
 
-This generates labeled sample:
-
-Events
-
-Login attempts
-
-IP activity
-
-Alerts
-
-The script refuses to run when:
+The command refuses to run when:
 
 NODE_ENV=production
 
-🐳 Docker
+This helps prevent accidental insertion of development/demo data into production environments.
 
-Docker Compose provides a hardened lab-oriented deployment.
+Docker
 
-Start
-
-cp .env.example .env
-
-Set:
-
-DASHBOARD_PASSWORD=your-strong-password
-
-Then:
+Build and start Sentinel:
 
 docker compose up --build -d
 
-Check services:
+Check running services:
 
 docker compose ps
 
@@ -824,170 +303,122 @@ View logs:
 
 docker compose logs -f
 
-Docker URLs
-
-URL
-
-Service
-
-http://localhost:8080/
-
-Honeypot
-
-http://localhost:8080/soc/
-
-SOC Dashboard
-
-Stop
+Stop the environment:
 
 docker compose down
 
-Remove volumes:
+Remove containers and volumes:
 
 docker compose down -v
+Docker Architecture
 
-Removing volumes destroys stored database data.
+The containerized deployment consists of the following services:
 
-🐘 PostgreSQL
+Service	Role	Internal Port
+nginx	Edge reverse proxy	80
+honeypot	Honeypot application	8080
+dashboard	SOC dashboard	3000
+postgres	Optional PostgreSQL database	5432
 
-SQLite is the default database.
+The default Docker edge is exposed through:
 
-To use PostgreSQL:
+localhost:8080
+
+Docker hardening includes:
+
+Non-root containers
+Read-only root filesystem where applicable
+Dropped Linux capabilities
+no-new-privileges
+Resource limits
+Internal and edge networks
+Persistent database volumes
+PostgreSQL
+
+Sentinel can use PostgreSQL instead of SQLite.
+
+Example configuration:
 
 DB_CLIENT=postgres
 DATABASE_URL=postgresql://honeypot:honeypot@postgres:5432/honeypot
 POSTGRES_PASSWORD=honeypot
 
-Start the PostgreSQL profile:
+The PostgreSQL deployment is available through the Docker configuration/profile supplied by the project.
 
-docker compose --profile postgres up --build -d
+Configuration
 
-🔌 Docker Services
+Important environment variables include:
 
-Service
+Variable	Purpose
+NODE_ENV	Application environment
+LOG_LEVEL	Logging level
+DB_CLIENT	SQLite or PostgreSQL
+SQLITE_FILE	SQLite database location
+DATABASE_URL	PostgreSQL connection
+HONEYPOT_PORT	Honeypot port
+TRUST_PROXY	Proxy trust configuration
+MAX_REQUEST_BODY_BYTES	Request body limit
+MAX_QUERY_LENGTH	Query length limit
+REQUEST_TIMEOUT_MS	Request timeout
+PORT	Dashboard port
+DASHBOARD_USER	Dashboard username
+DASHBOARD_PASSWORD	Dashboard password
+SESSION_COOKIE_NAME	Session cookie name
+SESSION_TTL_HOURS	Session lifetime
+SECURE_COOKIES	Secure cookie configuration
+RATE_LIMIT_MAX_REQUESTS	Rate-limit threshold
+RATE_LIMIT_WINDOW_SECONDS	Rate-limit window
+AUTH_ATTEMPT_THRESHOLD	Authentication alert threshold
+SENSITIVE_PATH_THRESHOLD	Sensitive-path threshold
+REQUESTS_PER_MINUTE_ALERT	Request-volume alert threshold
+SCANNER_WINDOW_MINUTES	Scanner detection window
+HTTP API
+Authentication
+Method	Endpoint
+POST	/api/auth/login
+POST	/api/auth/logout
+GET	/api/auth/session
+Security Data
+Method	Endpoint
+GET	/api/stats
+GET	/api/events
+GET	/api/events/:id
+GET	/api/events/stream
+GET	/api/ips
+GET	/api/ips/:ip
+GET	/api/logins
+GET	/api/alerts
+Configuration
+Method	Endpoint
+GET	/api/rules
+PUT	/api/rules
+GET	/api/settings
+PUT	/api/settings
+POST	/api/setup
+Reports
+GET /api/reports?format=json
+GET /api/reports?format=csv
+GET /api/reports?format=html
+Honeypot Routes
 
-Host
+The deliberately fake web application exposes routes including:
 
-Internal
+/
+├── /products
+├── /search?q=
+├── /login
+├── /admin
+├── /admin/login
+├── /dashboard
+├── /api
+├── /contact
+└── *
 
-Purpose
+These routes exist inside the controlled honeypot environment and are intended for monitoring and detection testing.
 
-nginx
+Detection Result Model
 
-8080 → 80
-
-Edge
-
-Reverse proxy
-
-honeypot
-
-—
-
-8080
-
-Fake application
-
-dashboard
-
-—
-
-3000
-
-SOC console
-
-postgres
-
-—
-
-5432
-
-Optional database
-
-🔐 Container Isolation
-
-The Docker configuration includes:
-
-Non-root containers
-
-Read-only root filesystems
-
-Dropped Linux capabilities
-
-no-new-privileges
-
-Resource limits
-
-Internal Docker network
-
-Separate edge network
-
-Database volumes
-
-Architecture:
-
-             Internet
-                │
-                ▼
-        ┌───────────────┐
-        │     nginx     │
-        │   Edge Net    │
-        └───────┬───────┘
-                │
-                ▼
-       ┌─────────────────┐
-       │ Internal Network│
-       └───────┬─────────┘
-               │
-       ┌───────┴────────┐
-       │                │
-       ▼                ▼
-  Honeypot         Dashboard
-       │                │
-       └───────┬────────┘
-               ▼
-           Database
-
-🛡️ Security Hardening Checklist
-
-For isolated lab deployments:
-
-Use a dedicated host or VM
-
-Use an isolated VLAN where appropriate
-
-Never mount host credentials
-
-Never mount SSH keys
-
-Never expose internal services unnecessarily
-
-Never expose PostgreSQL publicly
-
-Put TLS in front of nginx for remote deployments
-
-Enable secure cookies behind HTTPS
-
-Keep container images patched
-
-Export logs safely if forensic retention is required
-
-Recommended environment:
-
-Internet
-   │
-   ▼
-Firewall
-   │
-   ▼
-Isolated VM / Lab
-   │
-   ▼
-Sentinel
-
-🧠 Detection Result Model
-
-Each detector returns a structure similar to:
+Each detector returns a structured result:
 
 {
   category: string;
@@ -997,622 +428,159 @@ Each detector returns a structure similar to:
   confidence: number;
 }
 
-The engine:
-
-Runs enabled detectors
-
-Collects matches
-
-Merges results
-
-Selects the highest severity
-
-Combines detection reasons
-
-Stores the resulting event
-
-Generates alerts when thresholds are reached
-
-📡 HTTP API
-
-Base URL during development:
-
-http://localhost:3000
-
-Docker:
-
-http://localhost:8080/soc
-
-All routes require a valid authenticated session unless otherwise specified.
-
-Method
-
-Endpoint
-
-Purpose
-
-POST
-
-/api/auth/login
-
-Authenticate
-
-POST
-
-/api/auth/logout
-
-Logout
-
-GET
-
-/api/auth/session
-
-Session information
-
-GET
-
-/api/stats
-
-Dashboard statistics
-
-GET
-
-/api/events
-
-Event list/filter
-
-GET
-
-/api/events/:id
-
-Event details
-
-GET
-
-/api/events/stream
-
-SSE event stream
-
-GET
-
-/api/ips
-
-IP aggregates
-
-GET
-
-/api/ips/:ip
-
-IP details
-
-GET
-
-/api/logins
-
-Authentication attempts
-
-GET
-
-/api/alerts
-
-Recent alerts
-
-GET / PUT
-
-/api/rules
-
-Detection rules
-
-GET / PUT
-
-/api/settings
-
-Runtime settings
-
-GET
-
-/api/reports?format=json|csv|html
-
-Reports
-
-POST
-
-/api/setup
-
-First-run setup
-
-🛒 Honeypot Routes
-
-The fake BrightCart Commerce application exposes:
-
-Route
-
-Purpose
-
-/
-
-Fake storefront
-
-/products
-
-Product catalogue
-
-/search?q=
-
-Search
-
-/login
-
-Fake login trap
-
-/admin
-
-Fake admin page
-
-/admin/login
-
-Fake admin login trap
-
-/dashboard
-
-Fake customer dashboard
-
-/api
-
-Decorative API page
-
-/contact
-
-Contact page
-
-*
-
-Branded 404
-
-Every request passes through the monitoring pipeline:
-
-Rate Limit
-    ↓
-Capture
-    ↓
-Redaction
-    ↓
-Detection
-    ↓
-Database
-    ↓
-Alert
-
-⚙️ Configuration
-
-Application
-
-Variable
-
-Default
-
-Description
-
-NODE_ENV
-
-development
-
-Application environment
-
-LOG_LEVEL
-
-info
-
-Logging level
-
-Database
-
-Variable
-
-Default
-
-Description
-
-DB_CLIENT
-
-sqlite
-
-sqlite or postgres
-
-SQLITE_FILE
-
-./data/honeypot.db
-
-SQLite database
-
-DATABASE_URL
-
-—
-
-PostgreSQL connection
-
-Honeypot
-
-Variable
-
-Default
-
-HONEYPOT_PORT
-
-8080
-
-TRUST_PROXY
-
-1
-
-MAX_REQUEST_BODY_BYTES
-
-65536
-
-MAX_QUERY_LENGTH
-
-2048
-
-REQUEST_TIMEOUT_MS
-
-15000
-
-Dashboard
-
-Variable
-
-Default
-
-PORT
-
-3000
-
-NEXT_PUBLIC_BASE_PATH
-
-—
-
-DASHBOARD_USER
-
-admin
-
-DASHBOARD_PASSWORD
-
-Required
-
-SESSION_COOKIE_NAME
-
-hp_session
-
-SESSION_TTL_HOURS
-
-12
-
-SECURE_COOKIES
-
-0
-
-Rate Limiting & Alerts
-
-Variable
-
-Default
-
-RATE_LIMIT_MAX_REQUESTS
-
-120
-
-RATE_LIMIT_WINDOW_SECONDS
-
-60
-
-RATE_LIMIT_DELAY_MS
-
-0
-
-AUTH_ATTEMPT_THRESHOLD
-
-5
-
-SENSITIVE_PATH_THRESHOLD
-
-10
-
-REQUESTS_PER_MINUTE_ALERT
-
-300
-
-SCANNER_WINDOW_MINUTES
-
-10
-
-🧪 Testing
-
-Run the complete test suite:
+The detection pipeline follows this process:
+
+Request
+  ↓
+Enabled Detectors
+  ↓
+Detection Results
+  ↓
+Merge Matches
+  ↓
+Determine Highest Severity
+  ↓
+Combine Reasons
+  ↓
+Store Security Event
+  ↓
+Generate Alert When Required
+Test Coverage
+
+The automated test suite covers the major security and application layers.
+
+Area	Coverage
+Authentication	Session handling, password hashing, redaction
+Database	Schema and repository operations
+Detection	Detectors, severity, classification
+Honeypot	Request logging, sensitive paths, payload handling, login redaction
+Rate Limiting	429 behavior
+Validation	Zod validation
+
+Run tests:
 
 npm test
 
-Watch mode:
+Run tests in watch mode:
 
 npm run test:watch
 
-Type checking:
-
-npm run typecheck
-
-Linting:
+Run linting:
 
 npm run lint
 
-Test Coverage Areas
-
-Authentication
-      │
-      ├── Session handling
-      ├── Password hashing
-      └── Redaction
-
-Database
-      │
-      ├── Schema
-      └── Repository operations
-
-Detection
-      │
-      ├── All detectors
-      ├── Severity
-      └── Classification
-
-Honeypot
-      │
-      ├── Request logging
-      ├── Sensitive paths
-      ├── Payload handling
-      └── Login redaction
-
-Rate Limiting
-      │
-      └── 429 behavior
-
-Validation
-      │
-      └── Zod validation
-
-📦 npm Scripts
-
-Command
-
-Description
-
-npm run dev
-
-Start honeypot + dashboard
-
-npm run dev:honeypot
-
-Start honeypot only
-
-npm run dev:web
-
-Start dashboard only
-
-npm run build
-
-Production dashboard build
-
-npm start
-
-Start built dashboard
-
-npm run start:honeypot
-
-Start honeypot
-
-npm test
-
-Run tests
-
-npm run test:watch
-
-Test watch mode
-
-npm run lint
-
-ESLint
+Run type checking:
 
 npm run typecheck
+npm Scripts
+Command	Description
+npm run dev	Start development environment
+npm run dev:honeypot	Start honeypot development server
+npm run dev:web	Start dashboard development server
+npm run build	Build application
+npm start	Start dashboard
+npm run start:honeypot	Start honeypot
+npm test	Run tests
+npm run test:watch	Run tests in watch mode
+npm run lint	Run ESLint
+npm run typecheck	Run TypeScript checks
+npm run testdata	Generate development test data
+Security Hardening
 
-TypeScript checking
+For controlled deployments, consider the following:
 
-npm run testdata
+Run Sentinel on a dedicated host or VM
+Use an isolated VLAN/network
+Do not expose host credentials or SSH keys
+Avoid unnecessary public exposure
+Use TLS for remote deployments
+Enable secure cookies behind HTTPS
+Keep container images patched
+Review exported security logs before sharing them
+Restrict access to the SOC dashboard
+Use strong dashboard credentials
+Explicit Non-Features
 
-Generate development test data
+Sentinel intentionally does not provide functionality for:
 
-🔎 Troubleshooting
+Executing attacker-controlled payloads
+Storing plaintext passwords
+Scanning external systems
+Attacking third-party infrastructure
+Automated exploitation
+Unauthorized credential collection
+Uncontrolled public honeypot deployment
 
-Problem
+The project is designed around observation, detection, logging and defensive analysis.
 
-Solution
+Responsible Use
 
-EADDRINUSE
+Sentinel should only be deployed in environments where you have authorization to monitor the traffic and systems involved.
 
-Stop the process using port 8080 or 3000
+Recommended use cases include:
 
-Dashboard returns 401
-
-Sign in again or check session
-
-Docker password error
-
-Set DASHBOARD_PASSWORD in .env
-
-No events
-
-Verify the honeypot is running
-
-SQLite locked
-
-Avoid concurrent heavy writers
-
-Wrong client IP
-
-Verify TRUST_PROXY=1
-
-PostgreSQL unavailable
-
-Check DB_CLIENT and DATABASE_URL
-
-Windows process issue
-
-Run npm commands from a normal terminal
-
-Docker Logs
-
-docker compose logs -f nginx
-docker compose logs -f honeypot
-docker compose logs -f dashboard
-
-🚫 Explicit Non-Features
-
-Sentinel intentionally does not provide:
-
-❌ Malware collection/distribution
-❌ Exploit execution
-❌ RCE / reverse shells
-❌ Persistence mechanisms
-❌ Credential stuffing
-❌ DDoS tooling
-❌ Retaliatory attacks
-❌ Counter-scanning
-❌ External port scanning
-❌ Plaintext password storage
-
-These boundaries are part of the project's defensive design.
-
-🎓 Intended Use
-
-Sentinel is suitable for:
-
-Cybersecurity education
-
+Security education
+Detection engineering
 SOC training
-
-Defensive monitoring
-
 Honeypot research
+HTTP monitoring experiments
+Defensive security testing
+Local security laboratories
+Controlled incident-response exercises
 
-Detection-engine development
+Do not deploy the system against infrastructure you do not own or have explicit permission to monitor.
 
-Security demonstrations
+Roadmap
 
-Authorized security labs
+Potential future improvements include:
 
-HTTP attack-pattern analysis
+Expanded detector library
+Additional visualization components
+Improved event correlation
+More detailed IP investigation
+Additional report formats
+Enhanced alert management
+Extended PostgreSQL capabilities
+Additional security telemetry
+More automated test coverage
+Learning Goals
 
-Blue-team exercises
+Sentinel provides a practical environment for exploring:
 
-Use Sentinel only against systems and networks you own or are explicitly authorized to test.
+Web security monitoring
+Honeypot architecture
+Detection engineering
+Security event pipelines
+SOC dashboard design
+HTTP telemetry
+Authentication security
+Database-backed security systems
+Container security
+Defensive automation
+Contributing
 
-🗺️ Project Roadmap
+Contributions should maintain the project's defensive purpose.
 
-Potential future development areas:
+Before submitting changes:
+
+npm run lint
+npm run typecheck
+npm test
+
+When adding a new detector, document:
+
+What it detects
+Why it matters
+Expected severity
+Detection conditions
+False-positive considerations
+Test coverage
+License
+
+See the repository license file for the applicable licensing terms.
 
 Sentinel
-│
-├── 🔎 Detection
-│   ├── Additional detectors
-│   ├── Detection tuning
-│   └── Correlation improvements
-│
-├── 📊 SOC
-│   ├── Advanced analytics
-│   ├── Investigation workflows
-│   └── Expanded dashboards
-│
-├── 🚨 Alerts
-│   ├── More alert channels
-│   └── Improved correlation
-│
-├── 🗄️ Data
-│   ├── Extended PostgreSQL support
-│   └── Long-term event retention
-│
-└── 🐳 Infrastructure
-    ├── Deployment improvements
-    ├── Additional isolation options
-    └── Operational hardening
 
-📚 Learning Goals
+Observe. Detect. Investigate.
 
-Sentinel can be used to understand how a defensive monitoring system processes suspicious web traffic:
-
-HTTP Request
-     ↓
-Observation
-     ↓
-Sanitization
-     ↓
-Detection
-     ↓
-Classification
-     ↓
-Persistence
-     ↓
-Correlation
-     ↓
-Alert
-     ↓
-Investigation
-     ↓
-Report
-
-The goal is not simply to detect suspicious traffic, but to understand the complete lifecycle of a security event.
-
-🤝 Contributing
-
-Contributions are welcome when they maintain the project's defensive purpose.
-
-Before contributing:
-
-Keep attacker-controlled input inert.
-
-Never introduce plaintext credential storage.
-
-Do not add offensive attack automation.
-
-Keep detection language appropriately cautious.
-
-Add tests for new detection behavior.
-
-Document new configuration variables.
-
-Preserve the isolated-lab security model.
-
-For substantial changes, open an issue first to discuss the proposed design.
-
-📜 Responsible Use
-
-Sentinel is intended for:
-
-Authorized security research, education, defensive monitoring, and isolated laboratory environments.
-
-You are responsible for deploying and using Sentinel only in environments you own or have explicit permission to test.
-
-Misuse against systems or networks you do not control may violate laws, policies, or organizational rules.
-
-📄 License
-
-See the repository's license file for the applicable licensing terms.
-
-<div align="center">
-
-🛡️ Sentinel
-
-Observe · Detect · Analyze · Learn
-
-Defensive security engineering for controlled environments.
-
-<br>
-
-<img src="https://img.shields.io/badge/Defensive%20Security-Only-00C853?style=for-the-badge&logo=shield&logoColor=white" alt="Defensive Security Only"/>
-
-</div>
+A controlled security monitoring environment for learning, detection engineering and defensive security research.
